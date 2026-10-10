@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quitar Fondo · cualquier resolución</title>
+    <style>
+        /* =========================================================
+           RESET Y BASE
+           ========================================================= */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #2c3e50;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.5;
+        }
+
+        /* =========================================================
+           HEADER con banda superior (estilo imagen de playa)
+           ========================================================= */
+        .top-banner {
+            width: 100%;
+            height: 70px;
+            background: linear-gradient(135deg, #1abc9c 0%, #16a085 40%, #2c3e50 100%);
+            /* Si quieres una foto real, reemplaza este background por:
+               background: url('tu-imagen.jpg') center/cover no-repeat; */
+        }
+
+        /* =========================================================
+           CONTENEDOR PRINCIPAL CENTRADO
+           ========================================================= */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px 60px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 760px;
+        }
+
+        /* =========================================================
+           TÍTULOS
+           ========================================================= */
+        .kicker {
+            text-align: center;
+            font-size: 0.8rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #7f8c8d;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 3rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            color: #2c3e50;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 0.98rem;
+            color: #555;
+            margin-bottom: 34px;
+        }
+
+        .subtitle a {
+            color: #16a085;
+            text-decoration: underline;
+        }
+
+        /* =========================================================
+           FORMULARIO / ZONA DE SUBIDA
+           ========================================================= */
+        .form-row {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        .form-row .field {
+            flex: 1;
+        }
+
+        /* Cajas con borde fino gris, como los inputs de la referencia */
+        .field-box {
+            width: 100%;
+            border: 1px solid #d5dbe1;
+            border-radius: 3px;
+            background: #ffffff;
+            padding: 12px 16px;
+            font-size: 0.95rem;
+            color: #2c3e50;
+            transition: border-color 0.15s, box-shadow 0.15s;
+            font-family: inherit;
+        }
+
+        .field-box:hover {
+            border-color: #b0bac4;
+        }
+
+        .field-box:focus {
+            outline: none;
+            border-color: #16a085;
+            box-shadow: 0 0 0 3px rgba(22, 160, 133, 0.12);
+        }
+
+        /* Zona de subida estilo "área grande" */
+        .upload-area {
+            border: 1px solid #d5dbe1;
+            border-radius: 3px;
+            background: #fafbfc;
+            padding: 42px 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+            margin-bottom: 6px;
+        }
+
+        .upload-area:hover {
+            border-color: #b0bac4;
+            background: #f4f7f9;
+        }
+
+        .upload-area input { display: none; }
+
+        .upload-area label {
+            cursor: pointer;
+            display: block;
+            color: #555;
+            font-size: 0.98rem;
+        }
+
+        .upload-area .highlight {
+            color: #16a085;
+            font-weight: 600;
+            text-decoration: underline;
+        }
+
+        .helper-text {
+            font-size: 0.82rem;
+            color: #7f8c8d;
+            margin-bottom: 24px;
+        }
+
+        /* =========================================================
+           SLIDER DE TOLERANCIA
+           ========================================================= */
+        .tolerance-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 14px 18px;
+            border: 1px solid #d5dbe1;
+            border-radius: 3px;
+            background: #fafbfc;
+            margin-bottom: 24px;
+        }
+
+        .tolerance-row label {
+            font-size: 0.82rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #7f8c8d;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        #toleranceSlider {
+            flex: 1;
+            accent-color: #8bc34a;
+            cursor: pointer;
+        }
+
+        #toleranceValue {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            min-width: 34px;
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* =========================================================
+           BOTÓN PRINCIPAL (verde lima, como "Enviar")
+           ========================================================= */
+        .btn-main {
+            width: 100%;
+            background: #8bc34a;
+            color: #ffffff;
+            border: none;
+            border-radius: 3px;
+            padding: 16px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s;
+            font-family: inherit;
+            letter-spacing: 0.02em;
+        }
+
+        .btn-main:hover {
+            background: #7cb342;
+        }
+
+        .btn-main:disabled {
+            background: #c8d6b8;
+            cursor: not-allowed;
+            color: #ffffff;
+        }
+
+        /* =========================================================
+           BOTONES SECUNDARIOS (Reiniciar / Descargar)
+           ========================================================= */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            background: #ffffff;
+            color: #2c3e50;
+            border: 1px solid #d5dbe1;
+            border-radius: 3px;
+            padding: 12px 18px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s, border-color 0.15s;
+            font-family: inherit;
+        }
+
+        .btn-secondary:hover {
+            background: #f4f7f9;
+            border-color: #b0bac4;
+        }
+
+        .btn-secondary:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+            background: #fafbfc;
+        }
+
+        /* =========================================================
+           RESOLUCIONES (badges discretos)
+           ========================================================= */
+        .resolutions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .res-item {
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+            padding: 6px 14px;
+            border: 1px solid #e1e7ec;
+            border-radius: 3px;
+            background: #fafbfc;
+        }
+
+        .res-label {
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: #7f8c8d;
+            font-weight: 600;
+        }
+
+        .res-value {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* =========================================================
+           VISTA PREVIA (canvas)
+           ========================================================= */
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid #e1e7ec;
+            border-radius: 3px;
+            padding: 20px;
+            min-height: 240px;
+            margin-bottom: 20px;
+        }
+
+        #imageCanvas {
+            max-width: 100%;
+            max-height: 65vh;
+            border-radius: 2px;
+            background: #f4f7f9;
+            /* Patrón de cuadros para ver transparencia */
+            background-image:
+                linear-gradient(45deg, #e8edf1 25%, transparent 25%),
+                linear-gradient(-45deg, #e8edf1 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #e8edf1 75%),
+                linear-gradient(-45deg, transparent 75%, #e8edf1 75%);
+            background-size: 22px 22px;
+            background-position: 0 0, 0 11px, 11px -11px, -11px 0px;
+            display: block;
+            width: auto;
+            height: auto;
+        }
+
+        .placeholder-msg {
+            color: #95a5a6;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        /* =========================================================
+           FOOTER (azul oscuro como la referencia)
+           ========================================================= */
+        footer {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 28px 20px;
+        }
+
+        .footer-inner {
+            max-width: 1100px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 26px;
+            font-size: 0.92rem;
+        }
+
+        .footer-inner a {
+            color: #ecf0f1;
+            text-decoration: none;
+            transition: color 0.15s;
+        }
+
+        .footer-inner a:hover {
+            color: #8bc34a;
+        }
+
+        /* =========================================================
+           UTILIDADES
+           ========================================================= */
+        .hidden { display: none !important; }
+
+        /* =========================================================
+           RESPONSIVE
+           ========================================================= */
+        @media (max-width: 560px) {
+            h1 { font-size: 2rem; }
+            .form-row { flex-direction: column; gap: 12px; }
+            .btn-group { flex-direction: column; }
+            .tolerance-row { flex-wrap: wrap; }
+            #toleranceSlider { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Banda superior (header visual) -->
+    <div class="top-banner"></div>
+
+    <!-- Contenido principal -->
+    <div class="main-wrapper">
+        <div class="container">
+
+            <div class="kicker">Convierte tu imagen en</div>
+            <h1>Sin Fondo</h1>
+            <p class="subtitle">
+                Sube una imagen y quita el fondo al instante. Especifica la resolución exacta y descarga en PNG transparente.
+            </p>
+
+            <!-- Zona de subida -->
+            <div class="upload-area" id="uploadArea">
+                <input type="file" id="fileInput" accept="image/*">
+                <label for="fileInput">
+                    <span>Arrastra o <span class="highlight">selecciona una imagen</span></span>
+                </label>
+            </div>
+            <p class="helper-text">
+                Formatos: PNG, JPG, WEBP, BMP. GIF (primer frame).
+            </p>
+
+            <!-- Resoluciones -->
+            <div class="resolutions">
+                <div class="res-item">
+                    <span class="res-label">Original</span>
+                    <span class="res-value" id="originalRes">—</span>
+                </div>
+                <div class="res-item" id="processedResContainer" style="opacity:0.5;">
+                    <span class="res-label">Salida</span>
+                    <span class="res-value" id="processedRes">—</span>
+                </div>
+            </div>
+
+            <!-- Slider de tolerancia -->
+            <div class="tolerance-row">
+                <label for="toleranceSlider">Tolerancia</label>
+                <input type="range" id="toleranceSlider" min="10" max="150" value="55" step="1">
+                <span id="toleranceValue">55</span>
+            </div>
+
+            <!-- Botón principal -->
+            <button class="btn-main" id="removeBgBtn" disabled>Quitar fondo</button>
+
+            <!-- Botones secundarios -->
+            <div class="btn-group" style="margin-top:14px;">
+                <button class="btn-secondary" id="resetBtn" disabled>Reiniciar</button>
+                <button class="btn-secondary" id="downloadBtn" disabled>Descargar PNG</button>
+            </div>
+
+            <!-- Vista previa -->
+            <div class="canvas-container">
+                <div class="placeholder-msg" id="placeholder">Ninguna imagen cargada</div>
+                <canvas id="imageCanvas" class="hidden"></canvas>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-inner">
+            <a href="#">Preguntas frecuentes</a>
+            <a href="#">Contáctenos</a>
+            <a href="#">Prensa</a>
+            <a href="#">Conferencias</a>
+            <a href="#">Términos y condiciones</a>
+            <a href="#">Privacidad</a>
+            <a href="#">Estudiantes</a>
+        </div>
+    </footer>
+
+<script>
+/*
+============================================================================
+LÓGICA (idéntica a la que ya funcionaba)
+============================================================================
+*/
+(function() {
+    'use strict';
+
+    /* ---------- 1. Referencias DOM ---------- */
+    const fileInput             = document.getElementById('fileInput');
+    const uploadArea            = document.getElementById('uploadArea');
+    const canvas                = document.getElementById('imageCanvas');
+    const ctx                   = canvas.getContext('2d', { willReadFrequently: true });
+    const placeholder           = document.getElementById('placeholder');
+    const originalResSpan       = document.getElementById('originalRes');
+    const processedResSpan      = document.getElementById('processedRes');
+    const processedResContainer = document.getElementById('processedResContainer');
+    const removeBgBtn           = document.getElementById('removeBgBtn');
+    const downloadBtn           = document.getElementById('downloadBtn');
+    const resetBtn              = document.getElementById('resetBtn');
+    const toleranceSlider       = document.getElementById('toleranceSlider');
+    const toleranceValue        = document.getElementById('toleranceValue');
+
+    /* ---------- 2. Estado ---------- */
+    let originalImage    = null;
+    let currentImageData = null;
+    let imageLoaded      = false;
+    let hasProcessed     = false;
+    let originalWidth    = 0;
+    let originalHeight   = 0;
+    let originalPixels   = null;
+    let bgColor          = null;
+
+    /* ---------- 3. Utilidades de interfaz ---------- */
+    function setUIBasedOnState() {
+        if (!imageLoaded) {
+            removeBgBtn.disabled = true;
+            downloadBtn.disabled = true;
+            resetBtn.disabled = true;
+            originalResSpan.textContent = '—';
+            processedResSpan.textContent = '—';
+            processedResContainer.style.opacity = '0.5';
+            canvas.classList.add('hidden');
+            placeholder.classList.remove('hidden');
+            return;
+        }
+        removeBgBtn.disabled = false;
+        resetBtn.disabled = false;
+        if (hasProcessed && currentImageData) {
+            downloadBtn.disabled = false;
+            processedResSpan.textContent = `${currentImageData.width} × ${currentImageData.height} px`;
+            processedResContainer.style.opacity = '1';
+        } else {
+            downloadBtn.disabled = true;
+            processedResSpan.textContent = '—';
+            processedResContainer.style.opacity = '0.5';
+        }
+        if (originalWidth && originalHeight) {
+            originalResSpan.textContent = `${originalWidth} × ${originalHeight} px`;
+        }
+    }
+
+    function drawOriginalToCanvas() {
+        if (!originalImage) return;
+        canvas.width = originalImage.naturalWidth;
+        canvas.height = originalImage.naturalHeight;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(originalImage, 0, 0);
+        canvas.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+    }
+
+    function drawImageDataToCanvas(imageData) {
+        canvas.width = imageData.width;
+        canvas.height = imageData.height;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.putImageData(imageData, 0, 0);
+        canvas.classList.remove('hidden');
+        placeholder.classList.add('hidden');
+    }
+
+    function resetAll() {
+        originalImage = null;
+        currentImageData = null;
+        originalPixels = null;
+        bgColor = null;
+        imageLoaded = false;
+        hasProcessed = false;
+        originalWidth = 0;
+        originalHeight = 0;
+        fileInput.value = '';
+        canvas.width = 0;
+        canvas.height = 0;
+        canvas.classList.add('hidden');
+        placeholder.classList.remove('hidden');
+        setUIBasedOnState();
+        uploadArea.querySelector('label').innerHTML = `
+            <span>Arrastra o <span class="highlight">selecciona una imagen</span></span>
+        `;
+    }
+
+    /* ---------- 4. Carga de imagen ---------- */
+    function handleFile(file) {
+        if (!file || !file.type.startsWith('image/')) {
+            alert('Por favor selecciona un archivo de imagen válido.');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = new Image();
+            img.onload = () => {
+                originalImage = img;
+                originalWidth = img.naturalWidth;
+                originalHeight = img.naturalHeight;
+                imageLoaded = true;
+                hasProcessed = false;
+                currentImageData = null;
+
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = originalWidth;
+                tempCanvas.height = originalHeight;
+                const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+                tempCtx.drawImage(img, 0, 0);
+                const srcData = tempCtx.getImageData(0, 0, originalWidth, originalHeight);
+                originalPixels = srcData.data;
+
+                bgColor = detectBackgroundColor(originalPixels, originalWidth, originalHeight);
+
+                originalResSpan.textContent = `${originalWidth} × ${originalHeight} px`;
+                processedResSpan.textContent = '—';
+                processedResContainer.style.opacity = '0.5';
+
+                drawOriginalToCanvas();
+
+                removeBgBtn.disabled = false;
+                downloadBtn.disabled = true;
+                resetBtn.disabled = false;
+
+                uploadArea.querySelector('label').innerHTML = `
+                    <span>Imagen cargada · <span class="highlight">${
+                        file.name.length > 40 ? file.name.substr(0, 37) + '...' : file.name
+                    }</span></span>
+                `;
+            };
+            img.onerror = () => alert('Error al cargar la imagen.');
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    /* ---------- 5. Detección del color de fondo ---------- */
+    function detectBackgroundColor(pixels, w, h) {
+        const samples = [];
+        const block = Math.max(2, Math.floor(Math.min(w, h) / 100));
+        const margin = Math.min(block, Math.floor(Math.min(w, h) / 6));
+
+        const takeBlock = (x0, y0) => {
+            for (let y = y0; y < y0 + margin; y++) {
+                for (let x = x0; x < x0 + margin; x++) {
+                    if (x < 0 || y < 0 || x >= w || y >= h) continue;
+                    const idx = (y * w + x) * 4;
+                    samples.push([pixels[idx], pixels[idx + 1], pixels[idx + 2]]);
+                }
+            }
+        };
+
+        takeBlock(0, 0);
+        takeBlock(w - margin, 0);
+        takeBlock(0, h - margin);
+        takeBlock(w - margin, h - margin);
+        takeBlock(Math.floor(w / 2) - Math.floor(margin / 2), 0);
+        takeBlock(Math.floor(w / 2) - Math.floor(margin / 2), h - margin);
+        takeBlock(0, Math.floor(h / 2) - Math.floor(margin / 2));
+        takeBlock(w - margin, Math.floor(h / 2) - Math.floor(margin / 2));
+
+        let sumR = 0, sumG = 0, sumB = 0;
+        for (const [r, g, b] of samples) { sumR += r; sumG += g; sumB += b; }
+        const n = samples.length || 1;
+        return {
+            r: Math.round(sumR / n),
+            g: Math.round(sumG / n),
+            b: Math.round(sumB / n)
+        };
+    }
+
+    /* ---------- 6. Procesamiento ---------- */
+    function processImage(tolerance) {
+        if (!originalPixels || !bgColor) return null;
+
+        const w = originalWidth;
+        const h = originalHeight;
+        const totalPixels = w * h;
+        const src = originalPixels;
+        const { r: bgR, g: bgG, b: bgB } = bgColor;
+
+        const alphaMap = new Float32Array(totalPixels);
+        const inner = tolerance * 0.5;
+
+        for (let i = 0; i < totalPixels; i++) {
+            const idx = i * 4;
+            const r = src[idx];
+            const g = src[idx + 1];
+            const b = src[idx + 2];
+            const dist = Math.sqrt(
+                (r - bgR) ** 2 + (g - bgG) ** 2 + (b - bgB) ** 2
+            );
+            let a;
+            if (dist <= inner) a = 0;
+            else if (dist >= tolerance) a = 1;
+            else a = (dist - inner) / (tolerance - inner);
+            alphaMap[i] = a;
+        }
+
+        const smoothedAlpha = new Float32Array(totalPixels);
+        for (let y = 0; y < h; y++) {
+            for (let x = 0; x < w; x++) {
+                let sum = 0, count = 0;
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        if (nx < 0 || ny < 0 || nx >= w || ny >= h) continue;
+                        sum += alphaMap[ny * w + nx];
+                        count++;
+                    }
+                }
+                smoothedAlpha[y * w + x] = sum / count;
+            }
+        }
+
+        const outputData = new ImageData(w, h);
+        const out = outputData.data;
+
+        for (let i = 0; i < totalPixels; i++) {
+            const idx = i * 4;
+            const a = smoothedAlpha[i];
+
+            if (a <= 0.001) {
+                out[idx] = 0; out[idx + 1] = 0; out[idx + 2] = 0; out[idx + 3] = 0;
+                continue;
+            }
+            if (a >= 0.999) {
+                out[idx] = src[idx];
+                out[idx + 1] = src[idx + 1];
+                out[idx + 2] = src[idx + 2];
+                out[idx + 3] = 255;
+                continue;
+            }
+
+            const r = (src[idx]     - bgR * (1 - a)) / a;
+            const g = (src[idx + 1] - bgG * (1 - a)) / a;
+            const b = (src[idx + 2] - bgB * (1 - a)) / a;
+
+            out[idx]     = Math.max(0, Math.min(255, Math.round(r)));
+            out[idx + 1] = Math.max(0, Math.min(255, Math.round(g)));
+            out[idx + 2] = Math.max(0, Math.min(255, Math.round(b)));
+            out[idx + 3] = Math.round(a * 255);
+        }
+
+        return outputData;
+    }
+
+    /* ---------- 7. Quitar fondo ---------- */
+    function removeBackground() {
+        if (!originalImage || !imageLoaded) return;
+        const tolerance = parseInt(toleranceSlider.value, 10);
+        const result = processImage(tolerance);
+        if (!result) return;
+
+        currentImageData = result;
+        hasProcessed = true;
+        drawImageDataToCanvas(currentImageData);
+
+        processedResSpan.textContent = `${result.width} × ${result.height} px`;
+        processedResContainer.style.opacity = '1';
+        downloadBtn.disabled = false;
+
+        removeBgBtn.textContent = 'Fondo quitado';
+        setTimeout(() => { removeBgBtn.textContent = 'Quitar fondo'; }, 1200);
+    }
+
+    /* ---------- 8. Reprocesar al mover el slider ---------- */
+    let reprocessTimer = null;
+    function onToleranceChange() {
+        toleranceValue.textContent = toleranceSlider.value;
+        if (!hasProcessed) return;
+        clearTimeout(reprocessTimer);
+        reprocessTimer = setTimeout(() => {
+            const tolerance = parseInt(toleranceSlider.value, 10);
+            const result = processImage(tolerance);
+            if (!result) return;
+            currentImageData = result;
+            drawImageDataToCanvas(currentImageData);
+        }, 120);
+    }
+
+    /* ---------- 9. Descarga ---------- */
+    function downloadPNG() {
+        if (!currentImageData) {
+            alert('Primero debes quitar el fondo de la imagen.');
+            return;
+        }
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = currentImageData.width;
+        tempCanvas.height = currentImageData.height;
+        const tempCtx = tempCanvas.getContext('2d');
+        tempCtx.putImageData(currentImageData, 0, 0);
+
+        const link = document.createElement('a');
+        link.download = `sin_fondo_${currentImageData.width}x${currentImageData.height}.png`;
+        link.href = tempCanvas.toDataURL('image/png');
+        link.click();
+    }
+
+    /* ---------- 10. Event listeners ---------- */
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleFile(file);
+    });
+
+    uploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#16a085';
+        uploadArea.style.background = '#f0f8f6';
+    });
+    uploadArea.addEventListener('dragleave', () => {
+        uploadArea.style.borderColor = '#d5dbe1';
+        uploadArea.style.background = '#fafbfc';
+    });
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.style.borderColor = '#d5dbe1';
+        uploadArea.style.background = '#fafbfc';
+        const file = e.dataTransfer.files[0];
+        if (file) {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(file);
+            fileInput.files = dataTransfer.files;
+            handleFile(file);
+        }
+    });
+
+    removeBgBtn.addEventListener('click', removeBackground);
+    downloadBtn.addEventListener('click', downloadPNG);
+    resetBtn.addEventListener('click', resetAll);
+    toleranceSlider.addEventListener('input', onToleranceChange);
+
+    /* ---------- 11. Inicialización ---------- */
+    resetAll();
+    toleranceValue.textContent = toleranceSlider.value;
+
+})();
+</script>
+</body>
+</html>
